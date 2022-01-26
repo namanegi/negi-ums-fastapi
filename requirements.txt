@@ -1,0 +1,7 @@
+fastapi
+peewee
+uvicorn
+python-jose
+pytest
+python-multipart
+python-dotenv
