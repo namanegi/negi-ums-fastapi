@@ -3,17 +3,11 @@ import hashlib
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta
 from jose import jwt
-from functools import lru_cache
 
 from DBMgr import User, Session
-import config
+from config import get_settings
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-@lru_cache()
-def get_settings():
-    print()
-    return config.Settings()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 settings = get_settings()
 secret_key = settings.jwt_secret_key
@@ -33,6 +27,27 @@ def create_token(user_id: int):
     token = jwt.encode(token_payload, secret_key, algorithm='HS256')
     Session.update(token=token).where(Session.tid == user_id).execute()
     return token
+
+def create_user(username: str, password: str, email: str = ''):
+    user = None
+    try:
+        user = User.get(username=username)
+    except:
+        pass
+    if user:
+        raise HTTPException(status_code=409, detail='User existed')
+    tmp = User.create(
+        username=username,
+        password=hashlib.sha256(password.encode()).hexdigest(),
+        email=email
+    )
+    token_payload = {
+        "user_id": tmp.id,
+        "expired_at": (datetime.utcnow() + timedelta(days=3)).timestamp()
+    }
+    token = jwt.encode(token_payload, secret_key, algorithm='HS256')
+    Session.create(tid=tmp.id, token=token)
+    return tmp
 
 def get_user_from_token(token: str = Depends(oauth2_scheme)):
     try:

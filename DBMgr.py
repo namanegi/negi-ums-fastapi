@@ -9,8 +9,8 @@ class BaseModel(Model):
 class User(BaseModel):
     id = AutoField(primary_key=True)
     username = CharField(100, unique=True)
-    password = TextField()
-    email = CharField(null=False)
+    password = TextField(null=False)
+    email = CharField(default='')
 
 class Session(BaseModel):
     tid = ForeignKeyField(User, backref='user_id')

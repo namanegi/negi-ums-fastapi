@@ -1,10 +1,8 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Form
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
-from auth import auth_user, create_token, get_user_from_token
-from functools import lru_cache
-
-import config
+from auth import auth_user, create_token, get_user_from_token, create_user
+from config import get_settings
 
 app = FastAPI()
 
@@ -22,14 +20,9 @@ class Token(BaseModel):
     class Config:
         orm_mode = True
 
-@lru_cache()
-def get_settings():
-    print()
-    return config.Settings()
-
 settings = get_settings()
 
-@app.post('/token', response_model=Token)
+@app.post('/login', response_model=Token)
 async def login(form: OAuth2PasswordRequestForm = Depends()):
     user = auth_user(form.username, form.password)
     return {
@@ -37,11 +30,10 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
         "token_type": "bearer"
     }
 
-@app.post('/signup')
-async def signup(form: OAuth2PasswordRequestForm = Depends()):
-    return {
-        "user": form.username
-    }
+@app.post('/signup', response_model=UserRes)
+async def signup(username: str = Form(...), password: str = Form(...), email: str = Form('')):
+    new_user = create_user(username, password, email)
+    return new_user
 
 @app.get('/users/me', response_model=UserRes)
 async def get_me(cur_user: UserRes = Depends(get_user_from_token)):
