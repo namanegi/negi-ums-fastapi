@@ -19,6 +19,12 @@ def auth_user(username: str, password: str):
         # return 'password error'
     return user
 
+def read_user_info(username: str):
+    try:
+        return User.get(username=username)
+    except:
+        raise HTTPException(status_code=404, detail='User not exists')
+
 def create_token(user_id: int):
     token_payload = {
         "user_id": user_id,
@@ -48,6 +54,13 @@ def create_user(username: str, password: str, email: str = ''):
     token = jwt.encode(token_payload, secret_key, algorithm='HS256')
     Session.create(tid=tmp.id, token=token)
     return tmp
+
+def update_user(username: str, password: str, email: str):
+    User.update(
+        password=hashlib.sha256(password.encode()).hexdigest(),
+        email=email
+    ).where(User.username == username).execute()
+    return User.get(username=username)
 
 def get_user_from_token(token: str = Depends(oauth2_scheme)):
     try:
