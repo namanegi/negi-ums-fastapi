@@ -9,3 +9,7 @@ pip install -r requirements.txt
 echo JWT_SECRET_KEY="XXXXXXXX" >> .env
 uvicorn negi-ums:app --reload
 ```
+## Swagger
+* Auto Swagger page by FastAPI
+  * hosturl/docs
+    * http://localhost:8000/docs#/
