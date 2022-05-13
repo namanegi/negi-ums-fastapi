@@ -20,5 +20,10 @@ def init_db():
     db.create_tables([User])
     db.create_tables([Session])
 
+def clear_all_db():
+    User.drop_table()
+    Session.drop_table()
+    init_db()
+
 if __name__ == '__main__':
     init_db()

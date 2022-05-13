@@ -14,6 +14,8 @@ secret_key = settings.jwt_secret_key
 
 def auth_user(username: str, password: str):
     user = User.get(username=username)
+    if not user:
+        raise HTTPException(status_code=404, detail='user not exists')
     if hashlib.sha256(password.encode()).hexdigest() != user.password:
         raise HTTPException(status_code=401, detail='password ERROR')
         # return 'password error'
