@@ -1,11 +1,19 @@
-from fastapi import FastAPI, Depends, Form, HTTPException
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from DBMgr import clear_all_db
 from auth import auth_user, create_token, get_user_from_token, create_user, read_user_info, update_user
 from config import get_settings
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class UserInfoForm(OAuth2PasswordRequestForm):
     email: str = ''
