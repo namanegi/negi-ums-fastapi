@@ -38,7 +38,11 @@ class Token(BaseModel):
 
 settings = get_settings()
 
-@app.post('/login', response_model=Token)
+@app.post(
+    '/login',
+    response_model=Token,
+    description="The API for login, returns Bearer token"
+)
 async def login(form: OAuth2PasswordRequestForm = Depends()):
     user = auth_user(form.username, form.password)
     return {
@@ -46,13 +50,21 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
         "token_type": "bearer"
     }
 
-@app.post('/signup', response_model=UserRes)
-async def signup(form: UserInfoForm = Depends()):
+@app.post(
+    '/signup',
+    response_model=UserRes,
+    description="regist a new account in ums, unique username requested"
+)
+async def sign_up(form: UserInfoForm = Depends()):
     new_user = create_user(form.username, form.password, form.email)
     return new_user
 
-@app.get('/user/me', response_model=UserRes)
-async def get_me(cur_user: UserRes = Depends(get_user_from_token)):
+@app.get(
+    '/user/me',
+    response_model=UserRes,
+    description="The API for validating token and get self info"
+)
+async def get_self_and_auth(cur_user: UserRes = Depends(get_user_from_token)):
     return cur_user
 
 @app.get('/user/', response_model=UserRes)
